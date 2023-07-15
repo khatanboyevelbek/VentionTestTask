@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using VentionTestTask.Infrastructure.Data;
+
 namespace VentionTestTask.Api
 {
     public class Program
@@ -6,16 +9,13 @@ namespace VentionTestTask.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            RegisterDbContext(builder.Services, builder.Configuration);
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -30,6 +30,16 @@ namespace VentionTestTask.Api
             app.MapControllers();
 
             app.Run();
+        }
+
+        private static void RegisterDbContext(IServiceCollection services, IConfiguration configuration)
+        {
+            string connectionString = configuration.GetConnectionString("DefaultConnection");
+
+            services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlServer(connectionString);
+            });
         }
     }
 }
