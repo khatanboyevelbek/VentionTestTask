@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VentionTestTask.Application.Loggings;
+using VentionTestTask.Application.Security;
 using VentionTestTask.Infrastructure.Data;
 using VentionTestTask.Infrastructure.IRepositories;
 using VentionTestTask.Infrastructure.Repositories;
@@ -21,6 +22,7 @@ namespace VentionTestTask.Api
             RegisterDbContext(builder.Services, builder.Configuration);
             RegisterRepositories(builder.Services);
             builder.Services.AddScoped<ILogging, Logging>();
+            builder.Services.AddTransient<ISecurityPassword, SecurityPassword>();
 
             var app = builder.Build();
 
