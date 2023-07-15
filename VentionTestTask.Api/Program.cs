@@ -1,3 +1,6 @@
+using System.Net;
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VentionTestTask.Infrastructure.Data;
 using VentionTestTask.Infrastructure.IRepositories;
@@ -29,6 +32,30 @@ namespace VentionTestTask.Api
 
             app.UseAuthorization();
 
+            app.Use(async (context, next) =>
+            {
+                try
+                {
+                    await next(context);
+                }
+                catch (Exception e)
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    context.Response.ContentType = "application/json";
+
+                    ProblemDetails problem = new()
+                    {
+                        Status = (int)HttpStatusCode.InternalServerError,
+                        Type = "Server error",
+                        Title = "Server error",
+                        Detail = "An internal server error occured"
+                    };
+
+                    string json = JsonSerializer.Serialize(problem);
+
+                    await context.Response.WriteAsync(json);
+                }
+            });
 
             app.MapControllers();
 
