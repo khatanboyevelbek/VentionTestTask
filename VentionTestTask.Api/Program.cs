@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using VentionTestTask.Application.Loggings;
 using VentionTestTask.Infrastructure.Data;
 using VentionTestTask.Infrastructure.IRepositories;
 using VentionTestTask.Infrastructure.Repositories;
@@ -19,6 +20,7 @@ namespace VentionTestTask.Api
             builder.Services.AddSwaggerGen();
             RegisterDbContext(builder.Services, builder.Configuration);
             RegisterRepositories(builder.Services);
+            builder.Services.AddScoped<ILogging, Logging>();
 
             var app = builder.Build();
 

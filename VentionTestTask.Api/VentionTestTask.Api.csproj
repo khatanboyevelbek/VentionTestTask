@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\VentionTestTask.Application\VentionTestTask.Application.csproj" />
     <ProjectReference Include="..\VentionTestTask.Infrastructure\VentionTestTask.Infrastructure.csproj" />
   </ItemGroup>
 
