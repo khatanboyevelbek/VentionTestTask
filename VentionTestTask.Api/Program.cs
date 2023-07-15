@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using VentionTestTask.Infrastructure.Data;
+using VentionTestTask.Infrastructure.IRepositories;
+using VentionTestTask.Infrastructure.Repositories;
 
 namespace VentionTestTask.Api
 {
@@ -13,6 +15,7 @@ namespace VentionTestTask.Api
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             RegisterDbContext(builder.Services, builder.Configuration);
+            RegisterRepositories(builder.Services);
 
             var app = builder.Build();
 
@@ -40,6 +43,11 @@ namespace VentionTestTask.Api
             {
                 options.UseSqlServer(connectionString);
             });
+        }
+
+        private static void RegisterRepositories(IServiceCollection services)
+        {
+            services.AddTransient<IUserRepository, UserRepository>();
         }
     }
 }
