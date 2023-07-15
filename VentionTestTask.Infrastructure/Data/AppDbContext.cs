@@ -36,6 +36,8 @@ namespace VentionTestTask.Infrastructure.Data
                 .HasMany(p => p.Categories)
                 .WithMany(c => c.Products);
 
+            modelBuilder.Seed();
+
             base.OnModelCreating(modelBuilder);
         }
     }
