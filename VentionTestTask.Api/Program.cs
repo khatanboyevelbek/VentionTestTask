@@ -49,6 +49,7 @@ namespace VentionTestTask.Api
         {
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IOrderRepository, OrderRepository>();
+            services.AddTransient<IProductRepository, ProductRepository>();
         }
     }
 }
