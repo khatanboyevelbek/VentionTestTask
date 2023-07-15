@@ -48,6 +48,7 @@ namespace VentionTestTask.Api
         private static void RegisterRepositories(IServiceCollection services)
         {
             services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<IOrderRepository, OrderRepository>();
         }
     }
 }
