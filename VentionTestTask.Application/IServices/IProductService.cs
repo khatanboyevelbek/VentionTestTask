@@ -13,8 +13,8 @@ namespace VentionTestTask.Application.IServices
     {
         public Task<Product> AddProductAsync(CreateProductDto createProductDto);
         public Task<Product> UpdateProductAsync(UpdateProductDto updateProductDto);
-        public Task DeleteOrderAsync(Guid productId);
-        public IQueryable<Product> RetrieveAllOrdersAsync();
-        public Task<Product> RetrieveOrderByIdAsync(Guid productId);
+        public Task DeleteProductAsync(Guid productId);
+        public IQueryable<Product> RetrieveAllProductsAsync();
+        public Task<Product> RetrieveProductByIdAsync(Guid productId);
     }
 }

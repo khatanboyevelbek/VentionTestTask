@@ -21,13 +21,16 @@ namespace VentionTestTask.Application.Services.Products
         private readonly IProductRepository productRepository;
         private readonly ILogging logging;
         private readonly ValidateCreateProductDto validateCreate;
+        private readonly ValidateUpdateProductDto validateUpdate;
 
         public ProductService(IProductRepository productRepository, 
-            ILogging logging, ValidateCreateProductDto validateCreate)
+            ILogging logging, ValidateCreateProductDto validateCreate, 
+            ValidateUpdateProductDto validateUpdate)
         {
             this.productRepository = productRepository;
             this.logging = logging;
             this.validateCreate = validateCreate;
+            this.validateUpdate = validateUpdate;
         }
 
         public async Task<Product> AddProductAsync(CreateProductDto createProductDto)
@@ -79,7 +82,7 @@ namespace VentionTestTask.Application.Services.Products
             }
         }
 
-        public async Task DeleteOrderAsync(Guid productId)
+        public async Task DeleteProductAsync(Guid productId)
         {
             try
             {
@@ -123,7 +126,7 @@ namespace VentionTestTask.Application.Services.Products
             }
         }
 
-        public IQueryable<Product> RetrieveAllOrdersAsync()
+        public IQueryable<Product> RetrieveAllProductsAsync()
         {
             try
             {
@@ -143,14 +146,106 @@ namespace VentionTestTask.Application.Services.Products
             }
         }
 
-        public Task<Product> RetrieveOrderByIdAsync(Guid productId)
+        public async Task<Product> RetrieveProductByIdAsync(Guid productId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (productId == Guid.Empty)
+                {
+                    throw new ArgumentException("ProductId cannot be null");
+                }
+
+                Product existingProduct = await this.productRepository.SelectById(productId);
+
+                if (existingProduct == null)
+                {
+                    throw new NotFoundExceptions("Product is not found with this Id");
+                }
+
+                return existingProduct;
+            }
+            catch (ArgumentException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new FailedArgumentExceptions("Failed argument error occured. Try again!", exception);
+            }
+            catch (NotFoundExceptions exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new ItemDependencyExceptions("Product is not found. Try again!", exception);
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed product storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
 
-        public Task<Product> UpdateProductAsync(UpdateProductDto updateProductDto)
+        public async Task<Product> UpdateProductAsync(UpdateProductDto updateProductDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (updateProductDto is null)
+                {
+                    throw new ArgumentNullException("ProductDto is null");
+                }
+
+                ValidationResult validationResult = this.validateUpdate.Validate(updateProductDto);
+                Validate(validationResult);
+
+                Product existingProduct = await this.productRepository.SelectById(updateProductDto.Id);
+
+                if (existingProduct == null)
+                {
+                    throw new NotFoundExceptions("Product is not found with this Id");
+                }
+
+                existingProduct.Name = updateProductDto.Name;
+                existingProduct.Description = updateProductDto.Description;
+                existingProduct.Price = updateProductDto.Price;
+                existingProduct.Quantity = updateProductDto.Quantity;
+
+                return await this.productRepository.UpdateAsync(existingProduct);
+            }
+            catch (ArgumentNullException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new DtoValidationExceptions("Failed ProductDto validation error occured. Try again!", exception);
+            }
+            catch (InvalidDtoException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new DtoValidationExceptions("Failed ProductDto validation error occured. Try again!", exception);
+            }
+            catch (NotFoundExceptions exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new ItemDependencyExceptions("Product is not found. Try again!", exception);
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed product storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
     }
 }
