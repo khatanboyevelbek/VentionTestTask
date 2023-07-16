@@ -8,6 +8,7 @@ using VentionTestTask.Application.Loggings;
 using VentionTestTask.Application.Security;
 using VentionTestTask.Application.Services;
 using VentionTestTask.Application.Services.Orders;
+using VentionTestTask.Application.Services.Products;
 using VentionTestTask.Application.Validations.Orders;
 using VentionTestTask.Application.Validations.Products;
 using VentionTestTask.Application.Validations.Users;
@@ -108,6 +109,7 @@ namespace VentionTestTask.Api
         {
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IOrderService, OrderService>();
+            services.AddTransient<IProductRepository, ProductService>();
         }
     }
 }
