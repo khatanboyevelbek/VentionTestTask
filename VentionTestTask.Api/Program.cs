@@ -2,8 +2,11 @@ using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using VentionTestTask.Application.IServices;
 using VentionTestTask.Application.Loggings;
 using VentionTestTask.Application.Security;
+using VentionTestTask.Application.Services;
 using VentionTestTask.Application.Validations.Users;
 using VentionTestTask.Infrastructure.Data;
 using VentionTestTask.Infrastructure.IRepositories;
@@ -23,6 +26,7 @@ namespace VentionTestTask.Api
             RegisterDbContext(builder.Services, builder.Configuration);
             RegisterRepositories(builder.Services);
             RegisterUtilities(builder.Services);
+            RegisterServices(builder.Services);
 
 
             var app = builder.Build();
@@ -91,6 +95,11 @@ namespace VentionTestTask.Api
             services.AddTransient<ISecurityPassword, SecurityPassword>();
             services.AddTransient<ValidateCreateUserDto>();
             services.AddTransient<ValidateUpdateUserDto>();
+        }
+
+        private static void RegisterServices(IServiceCollection services)
+        {
+            services.AddTransient<IUserService, UserService>();
         }
     }
 }
