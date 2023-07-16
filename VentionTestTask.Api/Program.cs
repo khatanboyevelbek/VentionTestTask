@@ -97,6 +97,7 @@ namespace VentionTestTask.Api
             services.AddTransient<ValidateCreateUserDto>();
             services.AddTransient<ValidateUpdateUserDto>();
             services.AddTransient<ValidateCreateOrderDto>();
+            services.AddTransient<ValidateUpdateOrderDto>();
         }
 
         private static void RegisterServices(IServiceCollection services)

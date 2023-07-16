@@ -16,14 +16,17 @@ namespace VentionTestTask.Application.Services.Orders
         private readonly IOrderRepository orderRepository;
         private readonly ILogging logging;
         private readonly ValidateCreateOrderDto validateCreate;
+        private readonly ValidateUpdateOrderDto validateUpdate;
 
         public OrderService(IOrderRepository orderRepository,
             ILogging logging,
-            ValidateCreateOrderDto validateCreate) 
+            ValidateCreateOrderDto validateCreate,
+            ValidateUpdateOrderDto validateUpdate) 
         { 
             this.orderRepository = orderRepository;
             this.logging = logging;
             this.validateCreate = validateCreate;
+            this.validateUpdate = validateUpdate;
         }
 
         public async Task<Order> AddOrderAsync(CreateOrderDto createOrderDto)
@@ -139,14 +142,103 @@ namespace VentionTestTask.Application.Services.Orders
             }
         }
 
-        public Task<Order> RetrieveOrderByIdAsync(Guid orderId)
+        public async Task<Order> RetrieveOrderByIdAsync(Guid orderId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (orderId == Guid.Empty)
+                {
+                    throw new ArgumentException("UserId cannot be null");
+                }
+
+                Order existingOrder = await this.orderRepository.SelectById(orderId);
+
+                if (existingOrder == null)
+                {
+                    throw new NotFoundExceptions("Order is not found with this Id");
+                }
+
+                return existingOrder; 
+            }
+            catch (ArgumentException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new FailedArgumentExceptions("Failed argument error occured. Try again!", exception);
+            }
+            catch (NotFoundExceptions exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new ItemDependencyExceptions("Order is not found. Try again!", exception);
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed order storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
 
-        public Task<Order> UpdateOrderAsync(UpdateOrderDto updateOrderDto)
+        public async Task<Order> UpdateOrderAsync(UpdateOrderDto updateOrderDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (updateOrderDto is null)
+                {
+                    throw new ArgumentNullException("OrderDto is null");
+                }
+
+                ValidationResult validationResult = this.validateUpdate.Validate(updateOrderDto);
+                Validate(validationResult);
+
+                Order existingOrder = await this.orderRepository.SelectById(updateOrderDto.Id);
+
+                if (existingOrder == null)
+                {
+                    throw new NotFoundExceptions("Order is not found with this Id");
+                }
+
+                existingOrder.TotalAmount = updateOrderDto.TotalAmount;
+
+                return await this.orderRepository.UpdateAsync(existingOrder);
+            }
+            catch (ArgumentNullException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new DtoValidationExceptions("Failed OrderDto validation error occured. Try again!", exception);
+            }
+            catch (InvalidDtoException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new DtoValidationExceptions("Failed OrderDto validation error occured. Try again!", exception);
+            }
+            catch (NotFoundExceptions exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new ItemDependencyExceptions("Order is not found. Try again!", exception);
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed order storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
     }
 }
