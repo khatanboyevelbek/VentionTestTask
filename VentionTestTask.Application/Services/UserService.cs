@@ -127,11 +127,38 @@ namespace VentionTestTask.Application.Services
 
                 throw new ItemDependencyExceptions("User is not found. Try again!", exception);
             }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed user storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
 
-        public Task<IQueryable<User>> RetrieveAllUsersAsync(Expression<Func<User, bool>> expression = null)
+        public IQueryable<User> RetrieveAllUsersAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                return this.userRepository.SelectAll();
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed user storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
 
         public Task<User> RetrieveUserByIdAsync(Guid userId)
