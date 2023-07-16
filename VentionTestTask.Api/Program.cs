@@ -22,10 +22,8 @@ namespace VentionTestTask.Api
             builder.Services.AddSwaggerGen();
             RegisterDbContext(builder.Services, builder.Configuration);
             RegisterRepositories(builder.Services);
-            builder.Services.AddScoped<ILogging, Logging>();
-            builder.Services.AddTransient<ISecurityPassword, SecurityPassword>();
-            builder.Services.AddTransient<ValidateCreateUserDto>();
-            builder.Services.AddTransient<ValidateUpdateUserDto>();
+            RegisterUtilities(builder.Services);
+
 
             var app = builder.Build();
 
@@ -85,6 +83,14 @@ namespace VentionTestTask.Api
             services.AddTransient<IOrderRepository, OrderRepository>();
             services.AddTransient<IProductRepository, ProductRepository>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();
+        }
+
+        private static void RegisterUtilities(IServiceCollection services)
+        {
+            services.AddScoped<ILogging, Logging>();
+            services.AddTransient<ISecurityPassword, SecurityPassword>();
+            services.AddTransient<ValidateCreateUserDto>();
+            services.AddTransient<ValidateUpdateUserDto>();
         }
     }
 }
