@@ -13,5 +13,9 @@ namespace VentionTestTask.Domain.Exceptions
         public DtoValidationExceptions(string messsage, Xeption innerException) 
             : base(messsage, innerException)
         { }
+
+        public DtoValidationExceptions(string messsage, Exception innerException)
+            : base(messsage, innerException)
+        { }
     }
 }

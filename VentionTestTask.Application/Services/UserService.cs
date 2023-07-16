@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.Data.SqlClient;
 using VentionTestTask.Application.IServices;
@@ -17,17 +18,20 @@ namespace VentionTestTask.Application.Services
         private readonly IUserRepository userRepository;
         private readonly ILogging logging;
         private readonly ValidateCreateUserDto createValidation;
+        private readonly ValidateUpdateUserDto updateValidation;
         private readonly ISecurityPassword securityPassword;
 
 
         public UserService(IUserRepository userRepository, ILogging logging,
             ValidateCreateUserDto createValidation,
-            ISecurityPassword securityPassword)
+            ISecurityPassword securityPassword, 
+            ValidateUpdateUserDto updateValidation)
         {
             this.userRepository = userRepository;
             this.logging = logging;
             this.createValidation = createValidation;
             this.securityPassword = securityPassword;
+            this.updateValidation = updateValidation;
         }
 
         public async Task<User> AddUserAsync(CreateUserDto createUserDto)
@@ -36,7 +40,7 @@ namespace VentionTestTask.Application.Services
             {
                 if (createUserDto is null)
                 {
-                    throw new NullDtoExceptions("UserDto is null");
+                    throw new ArgumentNullException("UserDto is null");
                 }
 
                 ValidationResult validationResult = this.createValidation.Validate(createUserDto);
@@ -65,7 +69,7 @@ namespace VentionTestTask.Application.Services
 
                 return entity;
             }
-            catch (NullDtoExceptions exception)
+            catch (ArgumentNullException exception)
             {
                 this.logging.LogError(exception);
 
@@ -205,9 +209,64 @@ namespace VentionTestTask.Application.Services
             }
         }
 
-        public Task<User> UpdateUserAsync(UpdateUserDto updateUserDto)
+        public async Task<User> UpdateUserAsync(UpdateUserDto updateUserDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (updateUserDto is null)
+                {
+                    throw new ArgumentNullException("UserDto is null");
+                }
+
+                ValidationResult validationResult = this.updateValidation.Validate(updateUserDto);
+                Validate(validationResult);
+
+                User retrievedUser = await this.userRepository.SelectById(updateUserDto.Id);
+
+                if (retrievedUser is null)
+                {
+                    throw new NotFoundExceptions("User is not found with this Id");
+                }
+
+                retrievedUser.Name = updateUserDto.Name;
+                retrievedUser.Email = updateUserDto.Email;
+                retrievedUser.Password = this.securityPassword.Encrypt(updateUserDto.Password);
+                retrievedUser.Address = updateUserDto.Address;
+                retrievedUser.Phone = updateUserDto.Phone;
+                retrievedUser.UpdatedDate = DateTimeOffset.Now;
+
+                return await this.userRepository.UpdateAsync(retrievedUser);
+            }
+            catch (ArgumentNullException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new DtoValidationExceptions("Failed UserDto validation error occured. Try again!", exception);
+            }
+            catch (InvalidDtoException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new DtoValidationExceptions("Failed UserDto validation error occured. Try again!", exception);
+            }
+            catch (NotFoundExceptions exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new ItemDependencyExceptions("User is not found. Try again!", exception);
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed user storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
     }
 }
