@@ -25,6 +25,7 @@ namespace VentionTestTask.Api
             builder.Services.AddScoped<ILogging, Logging>();
             builder.Services.AddTransient<ISecurityPassword, SecurityPassword>();
             builder.Services.AddTransient<ValidateCreateUserDto>();
+            builder.Services.AddTransient<ValidateUpdateUserDto>();
 
             var app = builder.Build();
 
