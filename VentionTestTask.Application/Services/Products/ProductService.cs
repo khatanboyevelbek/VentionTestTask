@@ -79,9 +79,48 @@ namespace VentionTestTask.Application.Services.Products
             }
         }
 
-        public Task DeleteOrderAsync(Guid productId)
+        public async Task DeleteOrderAsync(Guid productId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (productId == Guid.Empty)
+                {
+                    throw new ArgumentException("ProductId cannot be null");
+                }
+
+                Product existingProduct = await this.productRepository.SelectById(productId);
+
+                if (existingProduct == null)
+                {
+                    throw new NotFoundExceptions("Product is not found with this Id");
+                }
+
+                await this.productRepository.DeleteAsync(existingProduct);
+            }
+            catch (ArgumentException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new FailedArgumentExceptions("Failed argument error occured. Try again!", exception);
+            }
+            catch (NotFoundExceptions exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new ItemDependencyExceptions("Priduct is not found. Try again!", exception);
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed order storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
 
         public IQueryable<Product> RetrieveAllOrdersAsync()
