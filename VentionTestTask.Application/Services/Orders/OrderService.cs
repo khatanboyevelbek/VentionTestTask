@@ -1,4 +1,5 @@
 ﻿using FluentValidation.Results;
+using Microsoft.Data.SqlClient;
 using VentionTestTask.Application.IServices;
 using VentionTestTask.Application.Loggings;
 using VentionTestTask.Application.Validations.Orders;
@@ -60,11 +61,62 @@ namespace VentionTestTask.Application.Services.Orders
 
                 throw new DtoValidationExceptions("Failed OrderDto validation error occured. Try again!", exception);
             }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed order storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
 
-        public Task DeleteOrderAsync(Guid orderId)
+        public async Task DeleteOrderAsync(Guid orderId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (orderId == Guid.Empty)
+                {
+                    throw new ArgumentException("UserId cannot be null");
+                }
+
+                Order existingOrder = await this.orderRepository.SelectById(orderId);
+
+                if (existingOrder == null)
+                {
+                    throw new NotFoundExceptions("Order is not found with this Id");
+                }
+
+                await this.orderRepository.DeleteAsync(existingOrder);
+            }
+            catch (ArgumentException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new FailedArgumentExceptions("Failed argument error occured. Try again!", exception);
+            }
+            catch (NotFoundExceptions exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new ItemDependencyExceptions("Order is not found. Try again!", exception);
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed order storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
 
         public IQueryable<Order> RetrieveAllOrdersAsync()
