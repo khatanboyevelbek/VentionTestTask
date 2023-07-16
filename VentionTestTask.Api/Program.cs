@@ -109,7 +109,7 @@ namespace VentionTestTask.Api
         {
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IOrderService, OrderService>();
-            services.AddTransient<IProductRepository, ProductService>();
+            services.AddTransient<IProductService, ProductService>();
         }
     }
 }
