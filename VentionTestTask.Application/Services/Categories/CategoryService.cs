@@ -143,9 +143,48 @@ namespace VentionTestTask.Application.Services.Categories
             }
         }
 
-        public Task<Category> RetrieveCategoryByIdAsync(Guid categoryId)
+        public async Task<Category> RetrieveCategoryByIdAsync(Guid categoryId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (categoryId == Guid.Empty)
+                {
+                    throw new ArgumentException("CategoryId cannot be null");
+                }
+
+                Category existingCategory = await this.categoryRepository.SelectById(categoryId);
+
+                if (existingCategory == null)
+                {
+                    throw new NotFoundExceptions("Category is not found with this Id");
+                }
+
+                return existingCategory;
+            }
+            catch (ArgumentNullException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new DtoValidationExceptions("Failed CategoryDto validation error occured. Try again!", exception);
+            }
+            catch (NotFoundExceptions exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new ItemDependencyExceptions("Category is not found. Try again!", exception);
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed category storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
 
         public Task<Category> UpdateCategoryAsync(UpdateCategoryDto updateCategoryDto)
