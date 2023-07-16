@@ -7,6 +7,7 @@ using VentionTestTask.Application.IServices;
 using VentionTestTask.Application.Loggings;
 using VentionTestTask.Application.Security;
 using VentionTestTask.Application.Services;
+using VentionTestTask.Application.Validations.Orders;
 using VentionTestTask.Application.Validations.Users;
 using VentionTestTask.Infrastructure.Data;
 using VentionTestTask.Infrastructure.IRepositories;
@@ -95,6 +96,7 @@ namespace VentionTestTask.Api
             services.AddTransient<ISecurityPassword, SecurityPassword>();
             services.AddTransient<ValidateCreateUserDto>();
             services.AddTransient<ValidateUpdateUserDto>();
+            services.AddTransient<ValidateCreateOrderDto>();
         }
 
         private static void RegisterServices(IServiceCollection services)

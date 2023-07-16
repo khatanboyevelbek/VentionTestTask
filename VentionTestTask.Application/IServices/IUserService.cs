@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using VentionTestTask.Domain.DTOs;
+using VentionTestTask.Domain.DTOs.Users;
 using VentionTestTask.Domain.Entities;
 
 namespace VentionTestTask.Application.IServices

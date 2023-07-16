@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
-using VentionTestTask.Domain.DTOs;
+using VentionTestTask.Domain.DTOs.Users;
 
 namespace VentionTestTask.Application.Validations.Users
 {

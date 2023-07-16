@@ -6,7 +6,7 @@ using VentionTestTask.Application.IServices;
 using VentionTestTask.Application.Loggings;
 using VentionTestTask.Application.Security;
 using VentionTestTask.Application.Validations.Users;
-using VentionTestTask.Domain.DTOs;
+using VentionTestTask.Domain.DTOs.Users;
 using VentionTestTask.Domain.Entities;
 using VentionTestTask.Domain.Exceptions;
 using VentionTestTask.Infrastructure.IRepositories;

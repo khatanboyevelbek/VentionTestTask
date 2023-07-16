@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VentionTestTask.Domain.DTOs
+namespace VentionTestTask.Domain.DTOs.Users
 {
-    public class UpdateUserDto
+    public class CreateUserDto
     {
-        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
