@@ -125,7 +125,22 @@ namespace VentionTestTask.Application.Services.Categories
 
         public IQueryable<Category> RetrieveAllCategoriesAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                return this.categoryRepository.SelectAll();
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed category storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
 
         public Task<Category> RetrieveCategoryByIdAsync(Guid categoryId)
