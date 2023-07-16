@@ -9,6 +9,7 @@ using VentionTestTask.Application.Security;
 using VentionTestTask.Application.Services;
 using VentionTestTask.Application.Services.Orders;
 using VentionTestTask.Application.Services.Products;
+using VentionTestTask.Application.Validations.Categories;
 using VentionTestTask.Application.Validations.Orders;
 using VentionTestTask.Application.Validations.Products;
 using VentionTestTask.Application.Validations.Users;
@@ -103,6 +104,8 @@ namespace VentionTestTask.Api
             services.AddTransient<ValidateUpdateOrderDto>();
             services.AddTransient<ValidateCreateProductDto>();
             services.AddTransient<ValidateUpdateProductDto>();
+            services.AddTransient<ValidateCreateCategoriesDto>();
+            services.AddTransient<ValidateUpdateCategoriesDto>();
         }
 
         private static void RegisterServices(IServiceCollection services)
