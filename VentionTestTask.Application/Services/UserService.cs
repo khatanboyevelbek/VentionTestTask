@@ -69,19 +69,19 @@ namespace VentionTestTask.Application.Services
             {
                 this.logging.LogError(exception);
 
-                throw new DtoValidationExceptions("Failed UserDto validation error occured", exception);
+                throw new DtoValidationExceptions("Failed UserDto validation error occured. Try again!", exception);
             }
             catch (InvalidDtoException exception)
             {
                 this.logging.LogError(exception);
 
-                throw new DtoValidationExceptions("Failed UserDto validation error occured", exception);
+                throw new DtoValidationExceptions("Failed UserDto validation error occured. Try again!", exception);
             }
             catch (AlreadyExistExceptions  exception)
             {
                 this.logging.LogCritical(exception);
 
-                throw new DtoValidationExceptions("User dependency validation error occured", exception);
+                throw new ItemDependencyExceptions("User dependency validation error occured. Try again!", exception);
             }
             catch (SqlException exception)
             {
@@ -97,9 +97,36 @@ namespace VentionTestTask.Application.Services
             }
         }
 
-        public Task DeleteUserAsync(Guid userId)
+        public async Task DeleteUserAsync(Guid userId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (userId == Guid.Empty)
+                {
+                    throw new ArgumentException("UserId cannot be null");
+                }
+
+                User existingUser = await this.userRepository.SelectById(userId);
+
+                if (existingUser == null)
+                {
+                    throw new NotFoundExceptions("User is not found with this Id");
+                }
+
+                await this.userRepository.DeleteAsync(existingUser);
+            }
+            catch (ArgumentException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new FailedArgumentExceptions("Failed argument error occured. Try again!", exception);
+            }
+            catch (NotFoundExceptions exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new ItemDependencyExceptions("User is not found. Try again!", exception);
+            }
         }
 
         public Task<IQueryable<User>> RetrieveAllUsersAsync(Expression<Func<User, bool>> expression = null)

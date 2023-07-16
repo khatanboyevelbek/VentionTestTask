@@ -14,7 +14,7 @@ namespace VentionTestTask.Application.IServices
         public Task<User> AddUserAsync(CreateUserDto createUserDto);
         public Task<User> UpdateUserAsync(UpdateUserDto updateUserDto);
         public Task DeleteUserAsync(Guid userId);
-        public Task<IQueryable<User>> RetrieveAllUsersAsync(Expression<Func<User, bool>> expression = null);
+        public IQueryable<User> RetrieveAllUsersAsync();
         public Task<User> RetrieveUserByIdAsync(Guid userId);
 
     }
