@@ -7,8 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="IServices\" />
-    <Folder Include="Services\" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="FluentValidation" Version="11.6.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VentionTestTask.Domain\VentionTestTask.Domain.csproj" />
+    <ProjectReference Include="..\VentionTestTask.Infrastructure\VentionTestTask.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
