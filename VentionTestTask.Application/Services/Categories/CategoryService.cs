@@ -187,9 +187,59 @@ namespace VentionTestTask.Application.Services.Categories
             }
         }
 
-        public Task<Category> UpdateCategoryAsync(UpdateCategoryDto updateCategoryDto)
+        public async Task<Category> UpdateCategoryAsync(UpdateCategoryDto updateCategoryDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (updateCategoryDto is null)
+                {
+                    throw new ArgumentNullException("ProductDto is null");
+                }
+
+                ValidationResult validationResult = this.validationUpdate.Validate(updateCategoryDto);
+                Validate(validationResult);
+
+                Category existingCategory = await this.categoryRepository.SelectById(categoryId);
+
+                if (existingCategory == null)
+                {
+                    throw new NotFoundExceptions("Category is not found with this Id");
+                }
+
+                existingCategory.Name = updateCategoryDto.Name;
+
+                return await this.categoryRepository.UpdateAsync(existingCategory);
+            }
+            catch (ArgumentNullException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new DtoValidationExceptions("Failed CategoryDto validation error occured. Try again!", exception);
+            }
+            catch (InvalidDtoException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new DtoValidationExceptions("Failed CategoryDto validation error occured. Try again!", exception);
+            }
+            catch (NotFoundExceptions exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new ItemDependencyExceptions("Category is not found. Try again!", exception);
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed category storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
     }
 }
