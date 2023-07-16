@@ -107,13 +107,13 @@ namespace VentionTestTask.Application.Services.Products
             {
                 this.logging.LogError(exception);
 
-                throw new ItemDependencyExceptions("Priduct is not found. Try again!", exception);
+                throw new ItemDependencyExceptions("Product is not found. Try again!", exception);
             }
             catch (SqlException exception)
             {
                 this.logging.LogCritical(exception);
 
-                throw new FailedStorageExceptions("Failed order storage error occured. Contact support!", exception);
+                throw new FailedStorageExceptions("Failed product storage error occured. Contact support!", exception);
             }
             catch (Exception exception)
             {
@@ -125,7 +125,22 @@ namespace VentionTestTask.Application.Services.Products
 
         public IQueryable<Product> RetrieveAllOrdersAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                return this.productRepository.SelectAll();
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed product storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
 
         public Task<Product> RetrieveOrderByIdAsync(Guid productId)
