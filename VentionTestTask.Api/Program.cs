@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VentionTestTask.Application.Loggings;
 using VentionTestTask.Application.Security;
+using VentionTestTask.Application.Validations.Users;
 using VentionTestTask.Infrastructure.Data;
 using VentionTestTask.Infrastructure.IRepositories;
 using VentionTestTask.Infrastructure.Repositories;
@@ -23,6 +24,7 @@ namespace VentionTestTask.Api
             RegisterRepositories(builder.Services);
             builder.Services.AddScoped<ILogging, Logging>();
             builder.Services.AddTransient<ISecurityPassword, SecurityPassword>();
+            builder.Services.AddTransient<ValidateCreateUserDto>();
 
             var app = builder.Build();
 
