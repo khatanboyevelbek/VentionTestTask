@@ -199,7 +199,7 @@ namespace VentionTestTask.Application.Services.Categories
                 ValidationResult validationResult = this.validationUpdate.Validate(updateCategoryDto);
                 Validate(validationResult);
 
-                Category existingCategory = await this.categoryRepository.SelectById(categoryId);
+                Category existingCategory = await this.categoryRepository.SelectById(updateCategoryDto.Id);
 
                 if (existingCategory == null)
                 {
