@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Xeption" Version="2.5.0" />
+  </ItemGroup>
+
 </Project>
