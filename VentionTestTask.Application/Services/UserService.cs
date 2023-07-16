@@ -161,9 +161,48 @@ namespace VentionTestTask.Application.Services
             }
         }
 
-        public Task<User> RetrieveUserByIdAsync(Guid userId)
+        public async Task<User> RetrieveUserByIdAsync(Guid userId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (userId == Guid.Empty)
+                {
+                    throw new ArgumentException("UserId cannot be null");
+                }
+
+                User retrievedUser =  await this.userRepository.SelectById(userId);
+
+                if (retrievedUser == null)
+                {
+                    throw new NotFoundExceptions("User is not found with this Id");
+                }
+
+                return retrievedUser;
+            }
+            catch (ArgumentException exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new FailedArgumentExceptions("Failed argument error occured. Try again!", exception);
+            }
+            catch (NotFoundExceptions exception)
+            {
+                this.logging.LogError(exception);
+
+                throw new ItemDependencyExceptions("User is not found. Try again!", exception);
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed user storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
 
         public Task<User> UpdateUserAsync(UpdateUserDto updateUserDto)
