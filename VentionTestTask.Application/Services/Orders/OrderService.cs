@@ -121,7 +121,22 @@ namespace VentionTestTask.Application.Services.Orders
 
         public IQueryable<Order> RetrieveAllOrdersAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                return this.orderRepository.SelectAll();
+            }
+            catch (SqlException exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedStorageExceptions("Failed order storage error occured. Contact support!", exception);
+            }
+            catch (Exception exception)
+            {
+                this.logging.LogCritical(exception);
+
+                throw new FailedServiceExceptions("Unexpected system error occured. Contact support!", exception);
+            }
         }
 
         public Task<Order> RetrieveOrderByIdAsync(Guid orderId)
