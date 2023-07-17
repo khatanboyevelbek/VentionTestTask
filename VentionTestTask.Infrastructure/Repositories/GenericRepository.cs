@@ -36,9 +36,6 @@ namespace VentionTestTask.Infrastructure.Repositories
             await this.context.SaveChangesAsync();
         }
 
-        public IQueryable<T> SelectAll(Expression<Func<T, bool>> filter = null) =>
-            filter is null ? this.dbSet : this.dbSet.Where(filter);
-
         public async Task<T> SelectById(Guid id) =>
             await this.dbSet.FindAsync(id);
 
