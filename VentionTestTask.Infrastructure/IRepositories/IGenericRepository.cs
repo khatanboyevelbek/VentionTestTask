@@ -12,7 +12,6 @@ namespace VentionTestTask.Infrastructure.IRepositories
         public Task<T> AddAsync(T entity);
         public Task<T> UpdateAsync(T entity);
         public Task DeleteAsync(T entity);
-        public IQueryable<T> SelectAll(Expression<Func<T, bool>> filter = null);
         public Task<T> SelectById(Guid id);
     }
 }
