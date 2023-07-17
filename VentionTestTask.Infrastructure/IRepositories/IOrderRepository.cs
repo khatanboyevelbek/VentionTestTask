@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 using VentionTestTask.Domain.Entities;
 
 namespace VentionTestTask.Infrastructure.IRepositories
 {
     public interface IOrderRepository : IGenericRepository<Order>
-    { }
+    {
+        public IQueryable<Order> SelectAll(Expression<Func<Order, bool>> filter = null);
+    }
 }
