@@ -12,17 +12,21 @@ namespace VentionTestTask.Application.Validations.Products
     {
         public ValidateCreateProductDto() 
         {
-            RuleFor(s => s.Name).NotNull().NotEmpty()
-                .WithMessage("Please provide a valid name");
+            RuleFor(s => s.Name)
+                .NotNull()
+                .NotEmpty();
 
-            RuleFor(s => s.Description).NotNull().NotEmpty()
-               .WithMessage("Please provide a valid description");
+            RuleFor(s => s.Description)
+                .NotNull()
+                .NotEmpty();
 
-            RuleFor(s => s.Price).NotNull()
-                .WithMessage("Please provide a valid price");
+            RuleFor(s => s.Price)
+                .NotEmpty()
+                .GreaterThan(0);
 
-            RuleFor(s => s.Quantity).NotNull().NotEmpty()
-                .WithMessage("Please provide valid quantity");
+            RuleFor(s => s.Quantity)
+                .NotEmpty()
+                .GreaterThan(0);
         }
     }
 }

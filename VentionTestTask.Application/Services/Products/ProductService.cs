@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.Data.SqlClient;
 using VentionTestTask.Application.IServices;
 using VentionTestTask.Application.Loggings;
-using VentionTestTask.Application.Validations.Products;
-using VentionTestTask.Domain.DTOs.Orders;
 using VentionTestTask.Domain.DTOs.Products;
 using VentionTestTask.Domain.Entities;
 using VentionTestTask.Domain.Exceptions;
@@ -20,12 +14,12 @@ namespace VentionTestTask.Application.Services.Products
     {
         private readonly IProductRepository productRepository;
         private readonly ILogging logging;
-        private readonly ValidateCreateProductDto validateCreate;
-        private readonly ValidateUpdateProductDto validateUpdate;
+        private readonly IValidator<CreateProductDto> validateCreate;
+        private readonly IValidator<UpdateProductDto> validateUpdate;
 
         public ProductService(IProductRepository productRepository, 
-            ILogging logging, ValidateCreateProductDto validateCreate, 
-            ValidateUpdateProductDto validateUpdate)
+            ILogging logging, IValidator<CreateProductDto> validateCreate,
+            IValidator<UpdateProductDto> validateUpdate)
         {
             this.productRepository = productRepository;
             this.logging = logging;
@@ -42,7 +36,7 @@ namespace VentionTestTask.Application.Services.Products
                     throw new ArgumentNullException("UserDto is null");
                 }
 
-                ValidationResult validationResult = this.validateCreate.Validate(createProductDto);
+                ValidationResult validationResult = await this.validateCreate.ValidateAsync(createProductDto);
                 Validate(validationResult);
 
                 var product = new Product()
@@ -199,15 +193,10 @@ namespace VentionTestTask.Application.Services.Products
                     throw new ArgumentNullException("ProductDto is null");
                 }
 
-                ValidationResult validationResult = this.validateUpdate.Validate(updateProductDto);
+                ValidationResult validationResult = await this.validateUpdate.ValidateAsync(updateProductDto);
                 Validate(validationResult);
 
                 Product existingProduct = await this.productRepository.SelectById(updateProductDto.Id);
-
-                if (existingProduct == null)
-                {
-                    throw new NotFoundExceptions("Product is not found with this Id");
-                }
 
                 existingProduct.Name = updateProductDto.Name;
                 existingProduct.Description = updateProductDto.Description;
@@ -227,12 +216,6 @@ namespace VentionTestTask.Application.Services.Products
                 this.logging.LogError(exception);
 
                 throw new DtoValidationExceptions("Failed ProductDto validation error occured. Try again!", exception);
-            }
-            catch (NotFoundExceptions exception)
-            {
-                this.logging.LogError(exception);
-
-                throw new ItemDependencyExceptions("Product is not found. Try again!", exception);
             }
             catch (SqlException exception)
             {

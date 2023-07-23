@@ -17,6 +17,7 @@ using VentionTestTask.Application.Validations.Products;
 using VentionTestTask.Application.Validations.Users;
 using VentionTestTask.Domain.DTOs.Categories;
 using VentionTestTask.Domain.DTOs.Orders;
+using VentionTestTask.Domain.DTOs.Products;
 using VentionTestTask.Infrastructure.Data;
 using VentionTestTask.Infrastructure.IRepositories;
 using VentionTestTask.Infrastructure.Repositories;
@@ -106,8 +107,8 @@ namespace VentionTestTask.Api
             services.AddTransient<ValidateUpdateUserDto>();
             services.AddTransient<IValidator<CreateOrderDto>, ValidateCreateOrderDto>();
             services.AddTransient<IValidator<UpdateOrderDto>, ValidateUpdateOrderDto >();
-            services.AddTransient<ValidateCreateProductDto>();
-            services.AddTransient<ValidateUpdateProductDto>();
+            services.AddTransient<IValidator<CreateProductDto>, ValidateCreateProductDto>();
+            services.AddTransient<IValidator<UpdateProductDto>, ValidateUpdateProductDto>();
             services.AddTransient<IValidator<CreateCategoryDto>, ValidateCreateCategoriesDto>();
             services.AddTransient<IValidator<UpdateCategoryDto>, ValidateUpdateCategoriesDto>();
         }
