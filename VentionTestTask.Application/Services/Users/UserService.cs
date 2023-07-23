@@ -1,11 +1,9 @@
-﻿using System.Linq.Expressions;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.Data.SqlClient;
 using VentionTestTask.Application.IServices;
 using VentionTestTask.Application.Loggings;
 using VentionTestTask.Application.Security;
-using VentionTestTask.Application.Validations.Users;
 using VentionTestTask.Domain.DTOs.Users;
 using VentionTestTask.Domain.Entities;
 using VentionTestTask.Domain.Exceptions;
@@ -17,15 +15,15 @@ namespace VentionTestTask.Application.Services
     {
         private readonly IUserRepository userRepository;
         private readonly ILogging logging;
-        private readonly ValidateCreateUserDto createValidation;
-        private readonly ValidateUpdateUserDto updateValidation;
+        private readonly IValidator<CreateUserDto> createValidation;
+        private readonly IValidator<UpdateUserDto> updateValidation;
         private readonly ISecurityPassword securityPassword;
 
 
         public UserService(IUserRepository userRepository, ILogging logging,
-            ValidateCreateUserDto createValidation,
-            ISecurityPassword securityPassword, 
-            ValidateUpdateUserDto updateValidation)
+            IValidator<CreateUserDto> createValidation,
+            ISecurityPassword securityPassword,
+            IValidator<UpdateUserDto> updateValidation)
         {
             this.userRepository = userRepository;
             this.logging = logging;
@@ -43,7 +41,7 @@ namespace VentionTestTask.Application.Services
                     throw new ArgumentNullException("UserDto is null");
                 }
 
-                ValidationResult validationResult = this.createValidation.Validate(createUserDto);
+                ValidationResult validationResult = await this.createValidation.ValidateAsync(createUserDto);
                 Validate(validationResult);
 
                 bool isUserExist = this.userRepository.SelectAll().Any(u => u.Email == createUserDto.Email);
@@ -218,15 +216,10 @@ namespace VentionTestTask.Application.Services
                     throw new ArgumentNullException("UserDto is null");
                 }
 
-                ValidationResult validationResult = this.updateValidation.Validate(updateUserDto);
+                ValidationResult validationResult = await this.updateValidation.ValidateAsync(updateUserDto);
                 Validate(validationResult);
 
                 User retrievedUser = await this.userRepository.SelectById(updateUserDto.Id);
-
-                if (retrievedUser is null)
-                {
-                    throw new NotFoundExceptions("User is not found with this Id");
-                }
 
                 retrievedUser.Name = updateUserDto.Name;
                 retrievedUser.Email = updateUserDto.Email;
@@ -248,12 +241,6 @@ namespace VentionTestTask.Application.Services
                 this.logging.LogError(exception);
 
                 throw new DtoValidationExceptions("Failed UserDto validation error occured. Try again!", exception);
-            }
-            catch (NotFoundExceptions exception)
-            {
-                this.logging.LogError(exception);
-
-                throw new ItemDependencyExceptions("User is not found. Try again!", exception);
             }
             catch (SqlException exception)
             {
