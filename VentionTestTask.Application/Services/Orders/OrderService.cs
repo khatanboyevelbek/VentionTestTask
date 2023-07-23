@@ -1,4 +1,5 @@
-﻿using FluentValidation.Results;
+﻿using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.Data.SqlClient;
 using VentionTestTask.Application.IServices;
 using VentionTestTask.Application.Loggings;
@@ -14,13 +15,13 @@ namespace VentionTestTask.Application.Services.Orders
     {
         private readonly IOrderRepository orderRepository;
         private readonly ILogging logging;
-        private readonly ValidateCreateOrderDto validateCreate;
-        private readonly ValidateUpdateOrderDto validateUpdate;
+        private readonly IValidator<CreateOrderDto> validateCreate;
+        private readonly IValidator<UpdateOrderDto> validateUpdate;
 
         public OrderService(IOrderRepository orderRepository,
             ILogging logging,
-            ValidateCreateOrderDto validateCreate,
-            ValidateUpdateOrderDto validateUpdate) 
+            IValidator<CreateOrderDto> validateCreate,
+            IValidator<UpdateOrderDto> validateUpdate)
         { 
             this.orderRepository = orderRepository;
             this.logging = logging;
@@ -37,7 +38,7 @@ namespace VentionTestTask.Application.Services.Orders
                     throw new ArgumentNullException("UserDto is null");
                 }
 
-                ValidationResult validationResult = this.validateCreate.Validate(createOrderDto);
+                ValidationResult validationResult = await this.validateCreate.ValidateAsync(createOrderDto);
                 Validate(validationResult);
 
                 var order = new Order()
@@ -194,15 +195,10 @@ namespace VentionTestTask.Application.Services.Orders
                     throw new ArgumentNullException("OrderDto is null");
                 }
 
-                ValidationResult validationResult = this.validateUpdate.Validate(updateOrderDto);
+                ValidationResult validationResult = await this.validateUpdate.ValidateAsync(updateOrderDto);
                 Validate(validationResult);
 
                 Order existingOrder = await this.orderRepository.SelectById(updateOrderDto.Id);
-
-                if (existingOrder == null)
-                {
-                    throw new NotFoundExceptions("Order is not found with this Id");
-                }
 
                 existingOrder.TotalAmount = updateOrderDto.TotalAmount;
 
@@ -219,12 +215,6 @@ namespace VentionTestTask.Application.Services.Orders
                 this.logging.LogError(exception);
 
                 throw new DtoValidationExceptions("Failed OrderDto validation error occured. Try again!", exception);
-            }
-            catch (NotFoundExceptions exception)
-            {
-                this.logging.LogError(exception);
-
-                throw new ItemDependencyExceptions("Order is not found. Try again!", exception);
             }
             catch (SqlException exception)
             {

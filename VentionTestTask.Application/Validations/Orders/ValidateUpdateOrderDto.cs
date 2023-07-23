@@ -4,19 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using VentionTestTask.Domain.DTOs.Orders;
+using VentionTestTask.Infrastructure.IRepositories;
 
 namespace VentionTestTask.Application.Validations.Orders
 {
     public class ValidateUpdateOrderDto : AbstractValidator<UpdateOrderDto>
     {
-        public ValidateUpdateOrderDto() 
+        public ValidateUpdateOrderDto(IOrderRepository orderRepository) 
         {
-            RuleFor(s => s.Id).NotNull()
-                .WithMessage("Please provide valid OrderId");
+            RuleFor(s => s.Id)
+                .NotEmpty()
+                .MustAsync(async (request, id, cancellationToken) =>
+                    await orderRepository.SelectAll().AnyAsync(o => o.Id == request.Id, cancellationToken))
+                .WithMessage("Order with this orderId is not found in the system"); 
 
-            RuleFor(s => s.TotalAmount).NotNull().NotEmpty()
-                .WithMessage("Please provide valid total amount");
+            RuleFor(s => s.TotalAmount)
+                .NotEmpty()
+                .GreaterThan(0);
         }
     }
 }

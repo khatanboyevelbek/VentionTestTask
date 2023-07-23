@@ -4,25 +4,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using VentionTestTask.Domain.DTOs.Orders;
+using VentionTestTask.Infrastructure.IRepositories;
 
 namespace VentionTestTask.Application.Validations.Orders
 {
     public class ValidateCreateOrderDto : AbstractValidator<CreateOrderDto>
     {
-        public ValidateCreateOrderDto()
+        public ValidateCreateOrderDto(IUserRepository userRepository, 
+            IProductRepository productRepository)
         {
-            RuleFor(s => s.OrderDate).NotNull().NotEmpty()
-                .WithMessage("Please provide a valid date");
+            RuleFor(s => s.OrderDate)
+                .NotEmpty()
+                .LessThan(DateTime.UtcNow);
 
-            RuleFor(s => s.UserId).NotNull().NotEmpty()
-               .WithMessage("Please provide a valid userId");
+            RuleFor(s => s.UserId)
+               .NotEmpty()
+               .MustAsync(async (request, id, cancellationToken) =>
+                    await userRepository.SelectAll().AnyAsync(u => u.Id == request.UserId, cancellationToken))
+               .WithMessage("User with this id is not found in the system");
 
-            RuleFor(s => s.ProductId).NotNull()
-                .WithMessage("Password should be minumum 8 characters");
+            RuleFor(s => s.ProductId)
+                .NotNull()
+                .MustAsync(async (request, id, cancellationToken) =>
+                    await productRepository.SelectAll().AnyAsync(p => p.Id == request.ProductId))
+                .WithMessage("Product with this productId is not found in the system");
 
-            RuleFor(s => s.TotalAmount).NotNull().NotEmpty()
-                .WithMessage("Please provide valid total amount");
+            RuleFor(s => s.TotalAmount)
+                .NotEmpty()
+                .GreaterThan(0);
         }
     }
 }
