@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -14,6 +15,7 @@ using VentionTestTask.Application.Validations.Categories;
 using VentionTestTask.Application.Validations.Orders;
 using VentionTestTask.Application.Validations.Products;
 using VentionTestTask.Application.Validations.Users;
+using VentionTestTask.Domain.DTOs.Categories;
 using VentionTestTask.Infrastructure.Data;
 using VentionTestTask.Infrastructure.IRepositories;
 using VentionTestTask.Infrastructure.Repositories;
@@ -105,8 +107,8 @@ namespace VentionTestTask.Api
             services.AddTransient<ValidateUpdateOrderDto>();
             services.AddTransient<ValidateCreateProductDto>();
             services.AddTransient<ValidateUpdateProductDto>();
-            services.AddTransient<ValidateCreateCategoriesDto>();
-            services.AddTransient<ValidateUpdateCategoriesDto>();
+            services.AddTransient<IValidator<CreateCategoryDto>, ValidateCreateCategoriesDto>();
+            services.AddTransient<IValidator<UpdateCategoryDto>, ValidateUpdateCategoriesDto>();
         }
 
         private static void RegisterServices(IServiceCollection services)

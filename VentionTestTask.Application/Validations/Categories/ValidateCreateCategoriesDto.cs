@@ -12,8 +12,9 @@ namespace VentionTestTask.Application.Validations.Categories
     {
         public ValidateCreateCategoriesDto() 
         {
-            RuleFor(s => s.Name).NotNull().NotEmpty()
-                .WithMessage("Please provide a valid name");
+            RuleFor(s => s.Name)
+                .NotNull()
+                .NotEmpty();
         }
     }
 }

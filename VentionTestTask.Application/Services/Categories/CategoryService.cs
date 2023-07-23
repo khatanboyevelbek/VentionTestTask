@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.Data.SqlClient;
 using VentionTestTask.Application.IServices;
@@ -20,12 +21,12 @@ namespace VentionTestTask.Application.Services.Categories
     {
         private readonly ICategoryRepository categoryRepository;
         private readonly ILogging logging;
-        private readonly ValidateCreateCategoriesDto validationCreate;
-        private readonly ValidateUpdateCategoriesDto validationUpdate;
+        private readonly IValidator<CreateCategoryDto> validationCreate;
+        private readonly IValidator<UpdateCategoryDto> validationUpdate;
 
         public CategoryService(ICategoryRepository categoryRepository, 
-            ILogging logging, ValidateCreateCategoriesDto validationCreate, 
-            ValidateUpdateCategoriesDto validationUpdate)
+            ILogging logging, IValidator<CreateCategoryDto> validationCreate,
+            IValidator<UpdateCategoryDto> validationUpdate)
         {
             this.categoryRepository = categoryRepository;
             this.logging = logging;
@@ -42,7 +43,7 @@ namespace VentionTestTask.Application.Services.Categories
                     throw new ArgumentNullException("CategoryDto is null");
                 }
 
-                ValidationResult validationResult = this.validationCreate.Validate(createCategoryDto);
+                ValidationResult validationResult = await this.validationCreate.ValidateAsync(createCategoryDto);
                 Validate(validationResult);
 
                 var category = new Category
@@ -196,15 +197,10 @@ namespace VentionTestTask.Application.Services.Categories
                     throw new ArgumentNullException("ProductDto is null");
                 }
 
-                ValidationResult validationResult = this.validationUpdate.Validate(updateCategoryDto);
+                ValidationResult validationResult = await this.validationUpdate.ValidateAsync(updateCategoryDto);
                 Validate(validationResult);
 
                 Category existingCategory = await this.categoryRepository.SelectById(updateCategoryDto.Id);
-
-                if (existingCategory == null)
-                {
-                    throw new NotFoundExceptions("Category is not found with this Id");
-                }
 
                 existingCategory.Name = updateCategoryDto.Name;
 
@@ -221,12 +217,6 @@ namespace VentionTestTask.Application.Services.Categories
                 this.logging.LogError(exception);
 
                 throw new DtoValidationExceptions("Failed CategoryDto validation error occured. Try again!", exception);
-            }
-            catch (NotFoundExceptions exception)
-            {
-                this.logging.LogError(exception);
-
-                throw new ItemDependencyExceptions("Category is not found. Try again!", exception);
             }
             catch (SqlException exception)
             {
